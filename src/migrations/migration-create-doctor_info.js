@@ -2,13 +2,15 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('markdowns', {
+    await queryInterface.createTable('doctor_infos', {
         // doctorId: DataTypes.INTEGER,
-        // clinicId: DataTypes.INTEGER,
-        // specialtyId: DataTypes.INTEGER,
-        // contentHTML: DataTypes.TEXT,
-        // contentMarkdown: DataTypes.STRING,
-        // description: DataTypes.TEXT
+        // priceId: DataTypes.INTEGER,
+        // provinceId: DataTypes.INTEGER,
+        // paymentId: DataTypes.INTEGER,
+        // addressClinic: DataTypes.STRING,
+        // nameClinic: DataTypes.STRING,
+        // note: DataTypes.STRING,
+        // count: DataTypes.INTEGER
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -18,20 +20,26 @@ module.exports = {
       doctorId: {
         type: Sequelize.INTEGER
       },
-      clinicId: {
+      priceId: {
         type: Sequelize.INTEGER
       },
-      specialtyId: {
+      provinceId: {
         type: Sequelize.INTEGER
       },
-      contentHTML: {
-        type: Sequelize.TEXT
+      paymentId: {
+        type: Sequelize.INTEGER
       },
-      contentMarkdown: {
+      addressClinic: {
         type: Sequelize.STRING
       },
-      description: {
-        type: Sequelize.TEXT
+      nameClinic: {
+        type: Sequelize.STRING
+      },
+      note: {
+        type: Sequelize.STRING
+      },
+      count: {
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
@@ -44,6 +52,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('markdowns');
+    await queryInterface.dropTable('doctor_infos');
   }
 };
