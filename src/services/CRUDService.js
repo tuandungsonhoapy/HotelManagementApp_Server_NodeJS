@@ -41,6 +41,63 @@ let hashUserPassword = (password) => {
     });
 };
 
+let getAllUsers = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            resolve(
+                await db.User.findAll({
+                    raw: true,
+                })
+            );
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+let getUser = (userId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let user = await db.User.findOne({
+                where: {
+                    id: userId,
+                },
+                raw: true,
+            });
+            resolve(user || {});
+        } catch (error) {
+            reject(error);
+        }
+    });
+};
+
+let updateUser = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let user = await db.User.findOne({
+                where: {
+                    id: data.id
+                }
+            })
+            if(user){
+                user.set(data)
+                await user.save()
+                resolve(await db.User.findAll({
+                    raw: true
+                }))
+            }else{
+                resolve()
+            }
+            
+        } catch (error) {
+            reject(error)
+        }
+    }) 
+}
+
 module.exports = {
     createNewUser,
+    getAllUsers,
+    getUser,
+    updateUser
 };
