@@ -3,14 +3,12 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Document</title>
+        <title>Redux</title>
     </head>
     <body>
-        <script>
-            fetch("http://localhost:8080/users").then(async (res) => {
-                let data = await res.json();
-                console.log(data);
-            });
-        </script>
+        <h1 id="outPut"></h1>
+        <button id="deposit">Deposit $10</button>
+        <button id="withdraw">Withdraw $10</button>
+        <script type="module" src="./index.js"></script>
     </body>
 </html>
