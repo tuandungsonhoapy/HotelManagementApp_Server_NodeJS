@@ -2,10 +2,12 @@
     "development": {
         "username": "root",
         "password": "123456tdung",
-        "database": "placeforhire",
+        "database": "luxurydatabase",
         "host": "127.0.0.1",
         "dialect": "mysql",
-        "logging": false
+        "define": {
+            "freezeTableName": true
+        }
     },
     "test": {
         "username": "root",

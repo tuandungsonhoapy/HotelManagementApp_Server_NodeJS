@@ -2,8 +2,8 @@ import BlogsService from '../services/BlogsService';
 
 const getBlogsList = async (req, res) => {
     try {
-        const response = await BlogsService.getBlogsList();
-        res.status(200).send(response);
+        const response = await BlogsService.getBlogs();
+        res.status(200).json(response);
     } catch (error) {
         res.status(502).send({
             error: {

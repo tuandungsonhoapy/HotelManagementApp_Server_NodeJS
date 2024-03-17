@@ -1,13 +1,18 @@
 import express from 'express';
-import ApiBlogsController from '../controllers/ApiBlogsController';
+import apiController from '../controllers/apiController';
 
-let router = express.Router();
+const router = express.Router();
 
-let initApiRoutes = (app) => {
-    router.get('/blogs', ApiBlogsController.getBlogsList);
-    router.post('/blogs', ApiBlogsController.createBlog);
+/**
+ *
+ * @param {*} app : express app
+ */
+
+const initApiRoutes = (app) => {
+    //path, handler
+    router.post('/register', apiController.handleRegister);
 
     return app.use('/api/v1', router);
 };
 
-module.exports = initApiRoutes;
+export default initApiRoutes;
