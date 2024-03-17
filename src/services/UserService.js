@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import db from '../models/index';
+import { Op } from 'sequelize';
 
 const salt = bcrypt.genSaltSync(10);
 
@@ -8,18 +9,18 @@ const hashUserPassword = (userPassword) => {
     return hashPassword;
 };
 
-const checkEmailExist = async (email) => {
+const checkEmailExist = async (emailData) => {
     let isExist = await db.User.findOne({
-        where: { email: email },
+        where: { email: emailData },
     });
 
     if (isExist) return true;
     return false;
 };
 
-const checkPhoneExist = async (phone) => {
+const checkPhoneExist = async (phoneData) => {
     let isExist = await db.User.findOne({
-        where: { phone: phone },
+        where: { phone: phoneData },
     });
 
     if (isExist) return true;
@@ -30,18 +31,22 @@ const registerNewUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             //check email/phoneNumber are exist
-            const isEmailExist = checkEmailExist(data.email);
-            if (isEmailExist === true)
-                return {
+            const isEmailExist = await checkEmailExist(data.email);
+            if (isEmailExist === true) {
+                reject({
                     message: 'The email is already exist!',
                     code: 1,
-                };
-            const isPhoneExist = checkPhoneExist(data.phone);
-            if (isPhoneExist === true)
-                return {
+                });
+                return;
+            }
+            const isPhoneExist = await checkPhoneExist(data.phone);
+            if (isPhoneExist === true) {
+                reject({
                     message: 'The phone is already exist!',
                     code: 1,
-                };
+                });
+                return;
+            }
 
             //hash user password
             let hashPassword = hashUserPassword(data.password);
@@ -61,13 +66,53 @@ const registerNewUser = (data) => {
             });
         } catch (error) {
             reject({
-                message: 'Something worngs with server',
-                code: 1,
+                message: 'Something worngs in service',
+                code: -1,
             });
         }
     });
 };
 
+const checkPassword = (inputPassword, hashPassword) => {
+    return bcrypt.compareSync(inputPassword, hashPassword);
+};
+
+const handleUserLogin = async (data) => {
+    try {
+        let user = await db.User.findOne({
+            where: {
+                [Op.or]: [
+                    { email: data.username },
+                    { username: data.username },
+                ],
+            },
+        });
+        console.log(user.get({ plain: true }));
+        if (user) {
+            let isCorrectPassword = checkPassword(data.password, user.password);
+            if (isCorrectPassword === true) {
+                return {
+                    message: 'Login successful!',
+                    code: 0,
+                    data: '',
+                };
+            }
+        }
+        return {
+            message: 'Your username or password is incorrect!',
+            code: 1,
+            data: '',
+        };
+    } catch (error) {
+        return {
+            message: 'Something wrongs with service!',
+            code: -1,
+            data: '',
+        };
+    }
+};
+
 module.exports = {
     registerNewUser,
+    handleUserLogin,
 };
