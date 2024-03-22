@@ -94,7 +94,7 @@ const handleUserLogin = async (data) => {
                 return {
                     message: 'Login successful!',
                     code: 0,
-                    data: '',
+                    data: user.get({ plain: true }),
                 };
             }
         }
