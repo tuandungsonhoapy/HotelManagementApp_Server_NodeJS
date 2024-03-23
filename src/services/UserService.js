@@ -9,9 +9,9 @@ const hashUserPassword = (userPassword) => {
     return hashPassword;
 };
 
-const checkEmailExist = async (emailData) => {
+const checkEmailExist = async (userData) => {
     let isExist = await db.User.findOne({
-        where: { email: emailData },
+        where: { username: userData },
     });
 
     if (isExist) return true;
@@ -31,11 +31,12 @@ const registerNewUser = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             //check email/phoneNumber are exist
-            const isEmailExist = await checkEmailExist(data.email);
+            const isEmailExist = await checkEmailExist(data.username);
             if (isEmailExist === true) {
                 reject({
-                    message: 'The email is already exist!',
+                    message: 'Your username is already exist!',
                     code: 1,
+                    data: '',
                 });
                 return;
             }
@@ -44,6 +45,7 @@ const registerNewUser = (data) => {
                 reject({
                     message: 'The phone is already exist!',
                     code: 1,
+                    data: '',
                 });
                 return;
             }
@@ -52,22 +54,24 @@ const registerNewUser = (data) => {
             let hashPassword = hashUserPassword(data.password);
 
             //create new user
-            await db.User.create({
-                email: data.email,
+            let newUser = await db.User.create({
+                firstName: data.firstName,
+                lastName: data.lastName,
                 username: data.username,
                 password: hashPassword,
                 phone: data.phone,
-                address: data.address,
             });
-
+            console.log(newUser);
             resolve({
                 message: 'A user is created successfully',
                 code: 0,
+                data: '',
             });
         } catch (error) {
             reject({
                 message: 'Something worngs in service',
                 code: -1,
+                data: '',
             });
         }
     });
@@ -81,10 +85,7 @@ const handleUserLogin = async (data) => {
     try {
         let user = await db.User.findOne({
             where: {
-                [Op.or]: [
-                    { email: data.username },
-                    { username: data.username },
-                ],
+                [Op.or]: [{ username: data.username }],
             },
         });
         console.log(user.get({ plain: true }));
