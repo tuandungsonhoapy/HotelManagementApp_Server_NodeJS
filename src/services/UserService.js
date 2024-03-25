@@ -88,7 +88,6 @@ const handleUserLogin = async (data) => {
                 [Op.or]: [{ username: data.username }],
             },
         });
-        console.log(user.get({ plain: true }));
         if (user) {
             let isCorrectPassword = checkPassword(data.password, user.password);
             if (isCorrectPassword === true) {
@@ -113,7 +112,116 @@ const handleUserLogin = async (data) => {
     }
 };
 
+//Lấy danh sách người dùng
+const getUsersService = async () => {
+    try {
+        let users = await db.User.findAll({
+            attributes: [
+                'id',
+                'firstName',
+                'lastName',
+                'username',
+                'phone',
+                'avatar',
+            ],
+            include: {
+                model: db.Group,
+                attributes: ['id', 'groupName', 'description'],
+            },
+        });
+        console.log('list User>>>>>..', users);
+        if (users) {
+            return {
+                message: 'Get users successfully!',
+                code: 0,
+                data: users,
+            };
+        } else {
+            return {
+                message: 'Get users successfully!',
+                code: 0,
+                data: [],
+            };
+        }
+    } catch (error) {
+        return {
+            message: 'Something wrongs with service!',
+            code: -1,
+            data: [],
+        };
+    }
+};
+
+const updateUserService = async (data) => {
+    try {
+        let user = await db.User.findOne({
+            where: { id: data.id },
+        });
+        if (user) {
+            //Update user
+            await user.Update({
+                firstName: data.firstName,
+                lastName: data.lastName,
+                phone: data.phone,
+                avatar: data.avatar,
+            });
+            return {
+                message: 'Update success!',
+                code: 0,
+                data: user,
+                status: 200,
+            };
+        } else {
+            return {
+                message: 'Not found!',
+                code: 1,
+                data: '',
+                status: 400,
+            };
+        }
+    } catch (error) {
+        return {
+            message: 'Something wrongs with service!',
+            code: -1,
+            data: [],
+        };
+    }
+};
+
+const deleteUserService = async (id) => {
+    try {
+        const user = await db.User.findOne({
+            where: { id: id },
+        });
+        if (user) {
+            await user.destroy();
+            return {
+                message: 'Delete success!',
+                code: 0,
+                data: '',
+                status: 200,
+            };
+        } else {
+            return {
+                message: 'Not found!',
+                code: 1,
+                data: '',
+                status: 400,
+            };
+        }
+    } catch (error) {
+        return {
+            message: 'Something wrongs with service!',
+            code: -1,
+            data: [],
+        };
+    }
+};
+
 module.exports = {
     registerNewUser,
     handleUserLogin,
+    getUsersService,
+    updateUserService,
+    deleteUserService,
 };

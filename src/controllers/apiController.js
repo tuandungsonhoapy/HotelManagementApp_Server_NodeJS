@@ -39,13 +39,21 @@ const handleRegister = async (req, res) => {
 
         //service: create user
         let response = await UserService.registerNewUser(req.body);
-
-        return res.status(200).json({
-            message: response.message,
-            code: response.code,
-            data: response.data,
-            status: 200,
-        });
+        if (response.code === 0) {
+            return res.status(200).json({
+                message: response.message,
+                code: response.code,
+                data: response.data,
+                status: 200,
+            });
+        } else {
+            return res.status(400).json({
+                message: response.message,
+                code: response.code,
+                data: response.data,
+                status: 400,
+            });
+        }
     } catch (error) {
         return res.status(500).json({
             message: error.message,
@@ -72,12 +80,21 @@ const handleLogin = async (req, res) => {
         //service: login
         let response = await UserService.handleUserLogin(req.body);
 
-        return res.status(200).json({
-            message: response.message,
-            code: response.code,
-            data: response.data,
-            status: 200,
-        });
+        if (response.code === 0) {
+            return res.status(200).json({
+                message: response.message,
+                code: response.code,
+                data: response.data,
+                status: 200,
+            });
+        } else {
+            return res.status(400).json({
+                message: response.message,
+                code: response.code,
+                data: response.data,
+                status: 400,
+            });
+        }
     } catch (error) {
         return res.status(500).json({
             message: error.message,
