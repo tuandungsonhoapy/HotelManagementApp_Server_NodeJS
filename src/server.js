@@ -5,7 +5,6 @@ import initApiRoutes from './routes/api';
 import connectDB from './config/connectDB';
 import configCors from './config/cors';
 const morgan = require('morgan'); //Hiện log request
-
 require('dotenv').config();
 
 const app = express();
