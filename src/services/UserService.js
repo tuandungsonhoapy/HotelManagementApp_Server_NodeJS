@@ -105,6 +105,7 @@ const handleUserLogin = async (data) => {
                 let groupWithRoles = await getGroupWithRoles(user);
                 let payload = {
                     username: user.username,
+                    avatar: user.avatar,
                     groupWithRoles,
                     expiresIn: process.env.JWT_EXPIRES_IN,
                 };
@@ -115,6 +116,10 @@ const handleUserLogin = async (data) => {
                     data: {
                         access_token: token,
                         groupWithRoles,
+                        user: {
+                            username: user.username,
+                            avatar: user.avatar,
+                        },
                     },
                 };
             }

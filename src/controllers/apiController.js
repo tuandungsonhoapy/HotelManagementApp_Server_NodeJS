@@ -80,6 +80,13 @@ const handleLogin = async (req, res) => {
         //service: login
         let response = await UserService.handleUserLogin(req.body);
 
+        if (response && response.data && response.data.access_token) {
+            res.cookie('jwt', response.data.access_token, {
+                httpOnly: true,
+                maxAge: 60 * 60 * 1000,
+            });
+        }
+
         if (response.code === 0) {
             return res.status(200).json({
                 message: response.message,

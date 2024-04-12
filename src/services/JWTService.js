@@ -11,7 +11,6 @@ const getGroupWithRoles = async (user) => {
             through: { attributes: [] },
         },
     });
-    console.log(roles);
     return roles ? roles : {};
 };
 

@@ -1,11 +1,13 @@
+require('dotenv').config();
 import express from 'express';
 import bodyParser from 'body-parser';
 import configViewEngine from './config/viewEngine';
 import initApiRoutes from './routes/api';
 import connectDB from './config/connectDB';
 import configCors from './config/cors';
+import cookieParser from 'cookie-parser';
+
 const morgan = require('morgan'); //Hiện log request
-require('dotenv').config();
 
 const app = express();
 
@@ -15,6 +17,9 @@ app.use(morgan('combined'));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+//Config cookie parser
+app.use(cookieParser());
 
 //CORS
 configCors(app);

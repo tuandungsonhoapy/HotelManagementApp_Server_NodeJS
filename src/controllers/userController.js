@@ -2,8 +2,6 @@ import userService from '../services/UserService';
 
 const getUsers = async (req, res) => {
     try {
-        console.log('>>>>>>>>>>>>Call getUssers');
-        console.log('>>>Request query: ', req.query);
         if (req.query.page && req.query.limit) {
             const { page, limit } = req.query;
             let response = await userService.getUsersWithPagination(
@@ -107,9 +105,23 @@ const createUser = async (req, res) => {
     }
 };
 
+const getUserAccount = async (req, res) => {
+    const data = {
+        access_token: req.token,
+        user: req.user,
+    };
+    console.log(data);
+    return res.status(200).json({
+        message: 'ok',
+        code: 0,
+        data: data,
+    });
+};
+
 module.exports = {
     getUsers,
     updateUser,
     deleteUser,
     createUser,
+    getUserAccount,
 };
