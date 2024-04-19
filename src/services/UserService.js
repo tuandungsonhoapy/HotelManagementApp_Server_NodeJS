@@ -107,7 +107,6 @@ const handleUserLogin = async (data) => {
                     username: user.username,
                     avatar: user.avatar,
                     groupWithRoles,
-                    expiresIn: process.env.JWT_EXPIRES_IN,
                 };
                 let token = createJWT(payload);
                 return {

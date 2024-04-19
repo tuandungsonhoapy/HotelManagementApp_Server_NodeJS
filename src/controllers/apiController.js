@@ -112,7 +112,27 @@ const handleLogin = async (req, res) => {
     }
 };
 
+const handleLogout = async (req, res) => {
+    try {
+        res.clearCookie('jwt');
+        return res.status(200).json({
+            message: 'ok',
+            code: 0,
+            data: '',
+            status: 200,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Logout failed!',
+            code: -1,
+            data: '',
+            status: 500,
+        });
+    }
+};
+
 module.exports = {
     handleRegister,
     handleLogin,
+    handleLogout,
 };
