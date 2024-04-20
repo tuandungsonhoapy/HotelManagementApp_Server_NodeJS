@@ -21,6 +21,20 @@ const getRolesService = async () => {
     }
 };
 
+const checkRoleExist = async (role) => {
+    try {
+        let data = await db.Role.findOne({
+            where: {
+                url: role.url,
+            },
+        });
+        return data;
+    } catch (error) {
+        console.log('>>>Error: ', error);
+        return null;
+    }
+};
+
 const createRoleService = async (roles) => {
     try {
         let existingRoles = await db.Role.findAll({
@@ -93,8 +107,42 @@ const deleteRoleService = async (id) => {
     }
 };
 
+const updateRolesService = async (roles) => {
+    let existCount = 0;
+    try {
+        for (let role of roles) {
+            const roleDB = await db.Role.findOne({
+                where: {
+                    id: role.id,
+                },
+            });
+
+            const roleExist = await checkRoleExist(role);
+            if (roleDB && !roleExist) {
+                await roleDB.update(role);
+            } else {
+                existCount++;
+            }
+        }
+        return {
+            message: `${
+                roles.length - existCount
+            } roles updated successfully and ${existCount} roles already exist`,
+            code: 0,
+            data: [],
+        };
+    } catch (error) {
+        return {
+            message: error.message,
+            code: -1,
+            data: [],
+        };
+    }
+};
+
 module.exports = {
     getRolesService,
     createRoleService,
     deleteRoleService,
+    updateRolesService,
 };

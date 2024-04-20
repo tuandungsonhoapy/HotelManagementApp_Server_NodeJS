@@ -41,6 +41,7 @@ const initApiRoutes = (app) => {
     router.get('/roles', roleController.getRoles);
     router.post('/role/create', roleController.createRole);
     router.delete('/role/delete', roleController.deleteRole);
+    router.put('/role/update', roleController.updateRole);
 
     return app.use('/api/v1', router);
 };
