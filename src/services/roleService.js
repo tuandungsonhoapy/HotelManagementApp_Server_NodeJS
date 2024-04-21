@@ -140,9 +140,43 @@ const updateRolesService = async (roles) => {
     }
 };
 
+const searchRoleService = async (search) => {
+    try {
+        let data = await db.Role.findAll({
+            where: {
+                [Op.or]: [
+                    {
+                        url: {
+                            [Op.like]: `%${search}%`,
+                        },
+                    },
+                    {
+                        description: {
+                            [Op.like]: `%${search}%`,
+                        },
+                    },
+                ],
+            },
+        });
+        return {
+            message: `${data.length} roles found`,
+            code: 0,
+            data: data,
+        };
+    } catch (error) {
+        console.log('>>>Error: ', error);
+        return {
+            message: error.message,
+            code: -1,
+            data: [],
+        };
+    }
+};
+
 module.exports = {
     getRolesService,
     createRoleService,
     deleteRoleService,
     updateRolesService,
+    searchRoleService,
 };
