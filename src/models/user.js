@@ -10,6 +10,9 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             // define association here
             User.belongsTo(models.Group);
+            User.hasMany(models.Invoice);
+            User.hasOne(models.Employee);
+            User.hasOne(models.Customer);
         }
     }
     User.init(

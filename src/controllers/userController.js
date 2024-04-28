@@ -118,10 +118,38 @@ const getUserAccount = async (req, res) => {
     });
 };
 
+const searchUser = async (req, res) => {
+    try {
+        if (req.query.page && req.query.limit && req.query.search) {
+            const { page, limit, search } = req.query;
+            let response = await userService.searchUserWithPagination(
+                +page,
+                +limit,
+                search
+            );
+            return res.status(200).json({
+                message: response.message,
+                code: response.code,
+                data: response.data,
+                status: 200,
+            });
+        }
+    } catch (error) {
+        console.log('>>>Error: ', error);
+        return res.status(500).json({
+            message: error.message,
+            code: error.code,
+            data: error.data,
+            status: 500,
+        });
+    }
+};
+
 module.exports = {
     getUsers,
     updateUser,
     deleteUser,
     createUser,
+    searchUser,
     getUserAccount,
 };

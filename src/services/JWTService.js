@@ -1,9 +1,9 @@
 import { where } from 'sequelize';
 import db from '../models/index';
 
-const getGroupWithRoles = async (user) => {
+const getGroupWithRoles = async (groupId) => {
     let roles = await db.Group.findOne({
-        where: { id: user.groupId },
+        where: { id: groupId },
         attributes: ['id', 'groupName', 'description'],
         include: {
             model: db.Role,

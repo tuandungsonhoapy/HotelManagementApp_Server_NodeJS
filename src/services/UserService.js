@@ -102,7 +102,7 @@ const handleUserLogin = async (data) => {
         if (user) {
             let isCorrectPassword = checkPassword(data.password, user.password);
             if (isCorrectPassword === true) {
-                let groupWithRoles = await getGroupWithRoles(user);
+                let groupWithRoles = await getGroupWithRoles(user.groupId);
                 let payload = {
                     username: user.username,
                     avatar: user.avatar,
@@ -394,6 +394,77 @@ const createUserService = async (data) => {
     }
 };
 
+const searchUserWithPagination = async (page, limit, search) => {
+    try {
+        let offset = (page - 1) * limit;
+        const { count, rows } = await db.User.findAndCountAll({
+            attributes: [
+                'id',
+                'firstName',
+                'lastName',
+                'username',
+                'phone',
+                'avatar',
+                'groupId',
+            ],
+            include: {
+                model: db.Group,
+                attributes: ['id', 'groupName', 'description'],
+            },
+            where: {
+                [Op.or]: [
+                    {
+                        username: {
+                            [Op.like]: `%${search}%`,
+                        },
+                    },
+                    {
+                        phone: {
+                            [Op.like]: `%${search}%`,
+                        },
+                    },
+                    {
+                        firstName: {
+                            [Op.like]: `%${search}%`,
+                        },
+                    },
+                    {
+                        lastName: {
+                            [Op.like]: `%${search}%`,
+                        },
+                    },
+                    {
+                        '$Group.groupName$': {
+                            [Op.like]: `%${search}%`,
+                        },
+                    },
+                ],
+            },
+            offset: offset,
+            limit: limit,
+            order: [['id', 'DESC']],
+        });
+        let totalPages = Math.ceil(count / limit);
+        let data = {
+            totalRows: count,
+            totalPages: totalPages,
+            users: rows,
+        };
+
+        return {
+            message: 'Get users successfully!',
+            code: 0,
+            data: data,
+        };
+    } catch (error) {
+        return {
+            message: 'Something wrongs with service!',
+            code: -1,
+            data: [],
+        };
+    }
+};
+
 module.exports = {
     registerNewUser,
     handleUserLogin,
@@ -402,4 +473,5 @@ module.exports = {
     deleteUserService,
     getUsersWithPagination,
     createUserService,
+    searchUserWithPagination,
 };

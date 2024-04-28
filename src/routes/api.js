@@ -4,6 +4,7 @@ import userController from '../controllers/userController';
 import groupController from '../controllers/groupController';
 import { checkUserJWT, checkUserPermission } from '../middleware/JWTAction';
 import roleController from '../controllers/roleController';
+import categoryController from '../controllers/categoryController';
 
 const router = express.Router();
 
@@ -33,6 +34,7 @@ const initApiRoutes = (app) => {
     router.put('/user/update', userController.updateUser);
     router.delete('/user/delete', userController.deleteUser);
     router.post('/user/create', userController.createUser);
+    router.get('/user/search', userController.searchUser);
 
     //group
     router.get('/groups', groupController.getGroups);
@@ -43,6 +45,15 @@ const initApiRoutes = (app) => {
     router.delete('/role/delete', roleController.deleteRole);
     router.put('/role/update', roleController.updateRole);
     router.get('/role/search', roleController.searchRole);
+    router.get('/role/by-group', roleController.getRolesByGroup);
+    router.post('/role/assign-role', roleController.assignRoleToGroup);
+
+    //category
+    router.get('/categories', categoryController.getCategories);
+    router.post('/category/create', categoryController.createCategory);
+    router.delete('/category/delete', categoryController.deleteCategory);
+    router.put('/category/update', categoryController.updateCategory);
+    router.get('/category/search', categoryController.searchCategory);
 
     return app.use('/api/v1', router);
 };

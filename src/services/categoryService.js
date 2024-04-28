@@ -2,11 +2,10 @@ import bcrypt from 'bcryptjs';
 import db from '../models/index';
 import { Op } from 'sequelize';
 import { raw } from 'body-parser';
-import { getGroupWithRoles } from './JWTService';
 
-const getRolesService = async () => {
+const getCategoriesService = async () => {
     try {
-        let data = await db.Role.findAll();
+        let data = await db.Category.findAll();
         return {
             message: 'Roles fetched successfully',
             code: 'GET_ROLES_SUCCESS',
@@ -22,11 +21,11 @@ const getRolesService = async () => {
     }
 };
 
-const checkRoleExist = async (role) => {
+const checkCategoryExist = async (category) => {
     try {
-        let data = await db.Role.findOne({
+        let data = await db.Category.findOne({
             where: {
-                url: role.url,
+                categoryName: category.categoryName,
             },
         });
         return data;
@@ -36,34 +35,37 @@ const checkRoleExist = async (role) => {
     }
 };
 
-const createRoleService = async (roles) => {
+const createCategoryService = async (categories) => {
     try {
-        let existingRoles = await db.Role.findAll({
+        let existingCategories = await db.Category.findAll({
             where: {
-                url: {
-                    [Op.in]: roles.map((role) => role.url),
+                categoryName: {
+                    [Op.in]: categories.map(
+                        (category) => category.categoryName
+                    ),
                 },
             },
             raw: true,
         });
-        console.log('>>>>>>>>>>>existingRoles: ', existingRoles);
-        let diffRoles = roles.filter((role) => {
+        console.log('>>>>>>>>>>>existingRoles: ', existingCategories);
+        let diffCategories = categories.filter((category) => {
             return !existingRoles.some(
-                (existingRole) => existingRole.url === role.url
+                (existingCategory) =>
+                    existingCategory.categoryName === category.categoryName
             );
         });
         console.log('>>>>>>>>>>>diffRoles: ', diffRoles);
-        if (diffRoles.length === 0) {
+        if (diffCategories.length === 0) {
             return {
-                message: 'All roles already exist',
+                message: 'All categories already exist',
                 code: 1,
                 data: null,
             };
         }
-        const data = await db.Role.bulkCreate(diffRoles);
+        const data = await db.Category.bulkCreate(diffCategories);
         console.log('>>>>>>>>>>>data: ', data);
         return {
-            message: `${diffRoles.length} Role created successfully`,
+            message: `${diffRoles.length} Category created successfully`,
             code: 0,
             data: data,
         };
@@ -77,9 +79,9 @@ const createRoleService = async (roles) => {
     }
 };
 
-const deleteRoleService = async (id) => {
+const deleteCategoryService = async (id) => {
     try {
-        const roleDB = await db.Role.findOne({
+        const roleDB = await db.Category.findOne({
             where: {
                 id: id,
             },
@@ -87,13 +89,13 @@ const deleteRoleService = async (id) => {
         if (roleDB) {
             await roleDB.destroy();
             return {
-                message: `Role deleted successfully`,
+                message: `Category deleted successfully`,
                 code: 0,
                 data: roleDB,
             };
         } else {
             return {
-                message: `Role not found`,
+                message: `Category not found`,
                 code: 1,
                 data: [],
             };
@@ -108,27 +110,27 @@ const deleteRoleService = async (id) => {
     }
 };
 
-const updateRolesService = async (roles) => {
+const updateCategoryService = async (categories) => {
     let existCount = 0;
     try {
-        for (let role of roles) {
-            const roleDB = await db.Role.findOne({
+        for (let category of categories) {
+            const roleDB = await db.Category.findOne({
                 where: {
-                    id: role.id,
+                    id: category.id,
                 },
             });
 
-            const roleExist = await checkRoleExist(role);
+            const roleExist = await checkCategoryExist(category);
             if (roleDB && !roleExist) {
-                await roleDB.update(role);
+                await roleDB.update(category);
             } else {
                 existCount++;
             }
         }
         return {
             message: `${
-                roles.length - existCount
-            } roles updated successfully and ${existCount} roles already exist`,
+                categories.length - existCount
+            } categories updated successfully and ${existCount} categories already exist`,
             code: 0,
             data: [],
         };
@@ -141,13 +143,13 @@ const updateRolesService = async (roles) => {
     }
 };
 
-const searchRoleService = async (search) => {
+const searchCategoryService = async (search) => {
     try {
-        let data = await db.Role.findAll({
+        let data = await db.Category.findAll({
             where: {
                 [Op.or]: [
                     {
-                        url: {
+                        categoryName: {
                             [Op.like]: `%${search}%`,
                         },
                     },
@@ -160,59 +162,10 @@ const searchRoleService = async (search) => {
             },
         });
         return {
-            message: `${data.length} roles found`,
+            message: `${data.length} categories found`,
             code: 0,
             data: data,
         };
-    } catch (error) {
-        console.log('>>>Error: ', error);
-        return {
-            message: error.message,
-            code: -1,
-            data: [],
-        };
-    }
-};
-
-const getRolesByGroupService = async (groupId) => {
-    try {
-        let data = await getGroupWithRoles(groupId);
-        return {
-            message: 'Roles of group fetched successfully',
-            code: 0,
-            data: data,
-        };
-    } catch (error) {
-        console.log('>>>Error: ', error);
-        return {
-            message: error.message,
-            code: -1,
-            data: [],
-        };
-    }
-};
-
-const assignRoleToGroupService = async (groupId, roles) => {
-    try {
-        let group = await db.Group.findOne({
-            where: {
-                id: groupId,
-            },
-        });
-        if (group) {
-            await group.setRoles(roles);
-            return {
-                message: 'Roles assigned to group successfully',
-                code: 0,
-                data: [],
-            };
-        } else {
-            return {
-                message: 'Group not found',
-                code: 1,
-                data: [],
-            };
-        }
     } catch (error) {
         console.log('>>>Error: ', error);
         return {
@@ -224,11 +177,9 @@ const assignRoleToGroupService = async (groupId, roles) => {
 };
 
 module.exports = {
-    getRolesService,
-    createRoleService,
-    deleteRoleService,
-    updateRolesService,
-    searchRoleService,
-    getRolesByGroupService,
-    assignRoleToGroupService,
+    getCategoriesService,
+    createCategoryService,
+    deleteCategoryService,
+    updateCategoryService,
+    searchCategoryService,
 };
