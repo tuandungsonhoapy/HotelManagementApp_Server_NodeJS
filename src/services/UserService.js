@@ -104,6 +104,7 @@ const handleUserLogin = async (data) => {
             if (isCorrectPassword === true) {
                 let groupWithRoles = await getGroupWithRoles(user.groupId);
                 let payload = {
+                    id: user.id,
                     username: user.username,
                     avatar: user.avatar,
                     groupWithRoles,
@@ -116,6 +117,7 @@ const handleUserLogin = async (data) => {
                         access_token: token,
                         groupWithRoles,
                         user: {
+                            id: user.id,
                             username: user.username,
                             avatar: user.avatar,
                         },

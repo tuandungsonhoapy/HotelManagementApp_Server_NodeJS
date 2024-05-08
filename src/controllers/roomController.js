@@ -1,8 +1,8 @@
-import categoryService from '../services/categoryService';
+import roomService from '../services/roomService';
 
-const getCategories = async (req, res) => {
+const getRooms = async (req, res) => {
     try {
-        let response = await categoryService.getCategoriesService();
+        let response = await roomService.getRoomsService();
         return res.status(200).json({
             message: response.message,
             code: response.code,
@@ -20,9 +20,9 @@ const getCategories = async (req, res) => {
     }
 };
 
-const createCategory = async (req, res) => {
+const createRoom = async (req, res) => {
     try {
-        let response = await categoryService.createCategoryService(req.body);
+        let response = await roomService.createRoomService(req.body);
         return res.status(200).json({
             message: response.message,
             code: response.code,
@@ -40,9 +40,9 @@ const createCategory = async (req, res) => {
     }
 };
 
-const deleteCategory = async (req, res) => {
+const deleteRoom = async (req, res) => {
     try {
-        let response = await categoryService.deleteCategoryService(req.body.id);
+        let response = await roomService.deleteRoomService(req.body.id);
         return res.status(200).json({
             message: response.message,
             code: response.code,
@@ -60,9 +60,9 @@ const deleteCategory = async (req, res) => {
     }
 };
 
-const updateCategory = async (req, res) => {
+const updateRoom = async (req, res) => {
     try {
-        let response = await categoryService.updateCategoryService(req.body);
+        let response = await roomService.updateRoomService(req.body);
         return res.status(200).json({
             message: response.message,
             code: response.code,
@@ -80,10 +80,30 @@ const updateCategory = async (req, res) => {
     }
 };
 
-const searchCategory = async (req, res) => {
+const searchRoom = async (req, res) => {
     try {
-        let response = await categoryService.searchCategoryService(
-            req.query.search
+        let response = await roomService.searchRoomService(req.query);
+        return res.status(200).json({
+            message: response.message,
+            code: response.code,
+            data: response.data,
+            status: 200,
+        });
+    } catch (error) {
+        console.log('>>>Error: ', error);
+        return res.status(500).json({
+            message: error.message,
+            code: error.code,
+            data: error.data,
+            status: 500,
+        });
+    }
+};
+
+const getRoomsByCategory = async (req, res) => {
+    try {
+        let response = await roomService.getRoomsByCategoryService(
+            req.query.categoryId
         );
         return res.status(200).json({
             message: response.message,
@@ -102,10 +122,11 @@ const searchCategory = async (req, res) => {
     }
 };
 
-module.exports = {
-    getCategories,
-    createCategory,
-    deleteCategory,
-    updateCategory,
-    searchCategory,
+export default {
+    getRooms,
+    createRoom,
+    deleteRoom,
+    updateRoom,
+    searchRoom,
+    getRoomsByCategory,
 };

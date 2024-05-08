@@ -1,7 +1,17 @@
 require('dotenv').config();
 import jwt from 'jsonwebtoken';
 
-const nonSecurePaths = ['/register', '/login', '/logout'];
+const nonSecurePaths = [
+    '/register',
+    '/login',
+    '/logout',
+    '/rooms',
+    '/room/search',
+    '/room/empty-by-category',
+    '/room/',
+];
+
+const nonPermissionPaths = ['/account'];
 
 const createJWT = (payload) => {
     let key = process.env.JWT_SECRET;
@@ -41,6 +51,11 @@ const extractToken = (req) => {
 
 const checkUserJWT = (req, res, next) => {
     if (nonSecurePaths.includes(req.path)) return next();
+    for (let path of nonSecurePaths) {
+        if (req.path.includes(path)) {
+            return next();
+        }
+    }
     let cookies = req.cookies;
     let tokenFromHeaders = extractToken(req);
     if ((cookies && cookies.jwt) || tokenFromHeaders) {
@@ -48,6 +63,7 @@ const checkUserJWT = (req, res, next) => {
         let decoded = verifyToken(token);
         if (decoded) {
             req.user = decoded;
+            console.log('>>> User: ', req.user);
             req.token = token;
             next();
         } else {
@@ -67,8 +83,17 @@ const checkUserJWT = (req, res, next) => {
 };
 
 const checkUserPermission = (req, res, next) => {
-    if (nonSecurePaths.includes(req.path) || req.path === '/account')
-        return next();
+    if (nonSecurePaths.includes(req.path)) return next();
+    for (let path of nonPermissionPaths) {
+        if (req.path.includes(path)) {
+            return next();
+        }
+    }
+    for (let path of nonSecurePaths) {
+        if (req.path.includes(path)) {
+            return next();
+        }
+    }
 
     if (req.user) {
         let { username, groupWithRoles } = req.user;
@@ -77,8 +102,9 @@ const checkUserPermission = (req, res, next) => {
         if (!roles || roles.length === 0) {
             return res.status('403').json({
                 message: `You don't have permission to access this url!`,
-                code: -1,
+                code: -3,
                 data: '',
+                status: '403',
             });
         }
 
@@ -90,15 +116,17 @@ const checkUserPermission = (req, res, next) => {
         } else {
             return res.status('403').json({
                 message: `You don't have permission to access this url!`,
-                code: -1,
+                code: -3,
                 data: '',
+                status: '403',
             });
         }
     } else {
         return res.status('401').json({
             message: 'Not authenticated the user',
-            code: -1,
+            code: -2,
             data: '',
+            status: '401',
         });
     }
 };

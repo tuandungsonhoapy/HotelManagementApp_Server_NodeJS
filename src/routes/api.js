@@ -5,6 +5,9 @@ import groupController from '../controllers/groupController';
 import { checkUserJWT, checkUserPermission } from '../middleware/JWTAction';
 import roleController from '../controllers/roleController';
 import categoryController from '../controllers/categoryController';
+import roomController from '../controllers/roomController';
+import bookingController from '../controllers/bookingController';
+import invoiceController from '../controllers/invoiceController';
 
 const router = express.Router();
 
@@ -54,6 +57,21 @@ const initApiRoutes = (app) => {
     router.delete('/category/delete', categoryController.deleteCategory);
     router.put('/category/update', categoryController.updateCategory);
     router.get('/category/search', categoryController.searchCategory);
+
+    //room
+    router.get('/rooms', roomController.getRooms);
+    router.post('/room/create', roomController.createRoom);
+    router.delete('/room/delete', roomController.deleteRoom);
+    router.put('/room/update', roomController.updateRoom);
+    router.get('/room/search', roomController.searchRoom);
+    router.get('/room/empty-by-category', roomController.getRoomsByCategory);
+
+    //booking
+    router.get('/room/:id', bookingController.getRoomById);
+    router.post('/booking/create', bookingController.createBooking);
+
+    //invoice
+    router.get('/invoice/by-user', invoiceController.getInvoicesByUser);
 
     return app.use('/api/v1', router);
 };

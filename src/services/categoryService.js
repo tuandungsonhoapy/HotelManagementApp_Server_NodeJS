@@ -8,14 +8,14 @@ const getCategoriesService = async () => {
         let data = await db.Category.findAll();
         return {
             message: 'Roles fetched successfully',
-            code: 'GET_ROLES_SUCCESS',
+            code: 0,
             data: data,
         };
     } catch (error) {
         console.log('>>>Error: ', error);
         return {
             message: error.message,
-            code: 'GET_ROLES_ERROR',
+            code: -1,
             data: [],
         };
     }
@@ -49,12 +49,12 @@ const createCategoryService = async (categories) => {
         });
         console.log('>>>>>>>>>>>existingRoles: ', existingCategories);
         let diffCategories = categories.filter((category) => {
-            return !existingRoles.some(
+            return !existingCategories.some(
                 (existingCategory) =>
                     existingCategory.categoryName === category.categoryName
             );
         });
-        console.log('>>>>>>>>>>>diffRoles: ', diffRoles);
+        console.log('>>>>>>>>>>>diffRoles: ', existingCategories);
         if (diffCategories.length === 0) {
             return {
                 message: 'All categories already exist',
@@ -65,7 +65,7 @@ const createCategoryService = async (categories) => {
         const data = await db.Category.bulkCreate(diffCategories);
         console.log('>>>>>>>>>>>data: ', data);
         return {
-            message: `${diffRoles.length} Category created successfully`,
+            message: `${diffCategories.length} Category created successfully`,
             code: 0,
             data: data,
         };
@@ -81,17 +81,17 @@ const createCategoryService = async (categories) => {
 
 const deleteCategoryService = async (id) => {
     try {
-        const roleDB = await db.Category.findOne({
+        const categoryDB = await db.Category.findOne({
             where: {
                 id: id,
             },
         });
-        if (roleDB) {
-            await roleDB.destroy();
+        if (categoryDB) {
+            await categoryDB.destroy();
             return {
                 message: `Category deleted successfully`,
                 code: 0,
-                data: roleDB,
+                data: categoryDB,
             };
         } else {
             return {
@@ -114,15 +114,15 @@ const updateCategoryService = async (categories) => {
     let existCount = 0;
     try {
         for (let category of categories) {
-            const roleDB = await db.Category.findOne({
+            const categoryDB = await db.Category.findOne({
                 where: {
                     id: category.id,
                 },
             });
 
-            const roleExist = await checkCategoryExist(category);
-            if (roleDB && !roleExist) {
-                await roleDB.update(category);
+            const categoryExist = await checkCategoryExist(category);
+            if (categoryDB && !categoryExist) {
+                await categoryDB.update(category);
             } else {
                 existCount++;
             }
