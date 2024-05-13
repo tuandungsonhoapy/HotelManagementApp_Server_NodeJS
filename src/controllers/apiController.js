@@ -82,7 +82,7 @@ const handleLogin = async (req, res) => {
 
         if (response && response.data && response.data.access_token) {
             res.cookie('jwt', response.data.access_token, {
-                httpOnly: true,
+                httpOnly: false,
                 maxAge: 12 * 60 * 60 * 1000,
             });
         }

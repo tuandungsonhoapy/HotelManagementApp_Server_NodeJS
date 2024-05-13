@@ -3,8 +3,19 @@ require('dotenv').config();
 const configCors = (app) => {
     app.use(function (req, res, next) {
         // Website you wish to allow to connect
-        res.setHeader('Access-Control-Allow-Origin', process.env.REACT_APP);
-
+        const allowedOrigins = [
+            process.env.REACT_APP,
+            'https://1401-14-161-6-190.ngrok-free.app',
+        ];
+        const origin = req.headers.origin;
+        // if (allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        // }
+        // res.setHeader('Access-Control-Allow-Origin', process.env.REACT_APP);
+        // res.setHeader(
+        //     'Access-Control-Allow-Origin',
+        //     'https://1401-14-161-6-190.ngrok-free.app'
+        // );
         // Request methods you wish to allow
         res.setHeader(
             'Access-Control-Allow-Methods',

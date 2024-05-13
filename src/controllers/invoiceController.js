@@ -22,6 +22,50 @@ const getInvoicesByUser = async (req, res) => {
     }
 };
 
+const getQuantityInvoicesByUser = async (req, res) => {
+    try {
+        let response = await invoiceSerivce.getQuantityInvoicesByUserService(
+            req.user.id
+        );
+        return res.status(200).json({
+            message: response.message,
+            code: response.code,
+            data: response.data,
+            status: 200,
+        });
+    } catch (error) {
+        console.log('>>>Error: ', error);
+        return res.status(500).json({
+            message: error.message,
+            code: error.code,
+            data: error.data,
+            status: 500,
+        });
+    }
+};
+
+const payDeposit = async (req, res) => {
+    try {
+        let response = await invoiceSerivce.payDepositService(req.body);
+        return res.status(200).json({
+            message: response.message,
+            code: response.code,
+            data: response.data,
+            status: 200,
+        });
+    } catch (error) {
+        console.log('>>>Error: ', error);
+        return res.status(500).json({
+            message: error.message,
+            code: error.code,
+            data: error.data,
+            status: 500,
+        });
+    }
+};
+
 module.exports = {
     getInvoicesByUser,
+    getQuantityInvoicesByUser,
+    payDeposit,
 };
