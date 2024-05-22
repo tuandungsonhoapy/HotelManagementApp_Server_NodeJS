@@ -63,8 +63,61 @@ const getBookingsByInvoice = async (req, res) => {
     }
 };
 
+const blockRoom = async (req, res) => {
+    try {
+        let rooms = req.body;
+        let data = { rooms, userId: req.user.id };
+        console.log('data block room >>>>>>>>>:', data);
+        let response = await bookingService.blockRoomService(data);
+        return res.status(200).json({
+            message: response.message,
+            code: response.code,
+            data: response.data,
+            status: 200,
+        });
+        // return res.status(200).json({
+        //     message: '',
+        //     code: '',
+        //     data: '',
+        //     status: 200,
+        // });
+    } catch (error) {
+        console.log('>>>Error: ', error);
+        return res.status(500).json({
+            message: error.message,
+            code: error.code,
+            data: error.data,
+            status: 500,
+        });
+    }
+};
+
+const unblockRoom = async (req, res) => {
+    try {
+        let rooms = req.body;
+        let data = { rooms, userId: req.user.id };
+        let response = await bookingService.unblockRoomService(data);
+        return res.status(200).json({
+            message: response.message,
+            code: response.code,
+            data: response.data,
+            status: 200,
+        });
+    } catch (error) {
+        console.log('>>>Error: ', error);
+        return res.status(500).json({
+            message: error.message,
+            code: error.code,
+            data: error.data,
+            status: 500,
+        });
+    }
+};
+
 module.exports = {
     getRoomById,
     createBooking,
     getBookingsByInvoice,
+    blockRoom,
+    unblockRoom,
 };

@@ -37,7 +37,7 @@ const getQuantityInvoicesByUserService = async (userId) => {
             where: {
                 userId: userId,
                 status: {
-                    [Op.or]: [0, 1],
+                    [Op.or]: [0],
                 },
             },
         });
@@ -89,14 +89,107 @@ const payDepositService = async (data) => {
                 data: '',
             };
         }
-        invoice.totalAmount = newPrice;
+        invoice.payments = newPrice;
         invoice.status = 1;
         await invoice.save();
 
+        // if (invoice) {
+        //     const rooms = invoice.Rooms;
+        //     for (let room of rooms) {
+        //         room.status = 2;
+        //         await room.save();
+        //     }
+        // }
+        return {
+            message: 'Deposit paid successfully',
+            code: 0,
+            data: invoice,
+        };
+    } catch (error) {
+        console.log('>>>Error: ', error);
+        return {
+            message: error.message,
+            code: -1,
+            data: '',
+        };
+    }
+};
+
+const getInvoicesService = async () => {
+    try {
+        let data = await db.Invoice.findAll({
+            order: [['createdAt', 'DESC']],
+        });
+        return {
+            message: 'Invoices fetched successfully',
+            code: 0,
+            data: data,
+        };
+    } catch (error) {
+        console.log('>>>Error: ', error);
+        return {
+            message: error.message,
+            code: -1,
+            data: [],
+        };
+    }
+};
+
+const payInvoiceService = async (data) => {
+    try {
+        const invoice = await db.Invoice.findOne({
+            where: { id: data.invoiceId },
+            include: [
+                {
+                    model: db.Room,
+                    through: { model: db.Booking },
+                    required: true,
+                },
+            ],
+        });
+        invoice.status = 3;
+        invoice.payments = 0;
+        await invoice.save();
         if (invoice) {
             const rooms = invoice.Rooms;
             for (let room of rooms) {
-                room.status = 1;
+                room.status = 0;
+                await room.save();
+            }
+        }
+        return {
+            message: 'Invoice paid successfully',
+            code: 0,
+            data: invoice,
+        };
+    } catch (error) {
+        console.log('>>>Error: ', error);
+        return {
+            message: error.message,
+            code: -1,
+            data: '',
+        };
+    }
+};
+
+const confirmPayDepositService = async (data) => {
+    try {
+        const invoice = await db.Invoice.findOne({
+            where: { id: data.invoiceId },
+            include: [
+                {
+                    model: db.Room,
+                    through: { model: db.Booking },
+                    required: true,
+                },
+            ],
+        });
+        invoice.status = 2;
+        await invoice.save();
+        if (invoice) {
+            const rooms = invoice.Rooms;
+            for (let room of rooms) {
+                room.status = 2;
                 await room.save();
             }
         }
@@ -119,4 +212,7 @@ module.exports = {
     getInvoicesByUserService,
     getQuantityInvoicesByUserService,
     payDepositService,
+    getInvoicesService,
+    payInvoiceService,
+    confirmPayDepositService,
 };

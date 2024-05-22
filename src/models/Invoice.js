@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
             totalAmount: DataTypes.FLOAT,
             note: DataTypes.STRING,
             userId: DataTypes.INTEGER,
+            payments: DataTypes.FLOAT,
         },
         {
             sequelize,

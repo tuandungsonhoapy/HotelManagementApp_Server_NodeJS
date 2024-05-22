@@ -92,14 +92,26 @@ const createBookingService = async (data) => {
                 data: [],
             };
         }
-        if (room.status === 1) {
+        if (room.status !== 0) {
             return {
                 message: 'Room is not available',
                 code: 1,
                 data: [],
             };
         }
-        let price = 0.3 * room.price;
+        let _startDate = new Date(data.startDate);
+        _startDate.setHours(0, 0, 0, 0);
+
+        let _endDate = new Date(data.endDate);
+        _endDate.setHours(0, 0, 0, 0);
+
+        // Tính số ngày giữa hai ngày
+        let diffInTime = _endDate.getTime() - _startDate.getTime();
+        let diffInDays = Math.ceil(diffInTime / (1000 * 3600 * 24));
+
+        // Tính tổng tiền
+        let totalPrice = room.price * diffInDays;
+        let price = 0.3 * totalPrice;
         console.log('data booking >>>>>>>>>>:', data);
         const _invoice = await db.Invoice.findOne({
             where: {
@@ -124,6 +136,9 @@ const createBookingService = async (data) => {
             let booking = await room.addInvoice(_invoice, {
                 through: bookingData,
             });
+            _invoice.totalAmount += totalPrice;
+            _invoice.payments += totalPrice;
+            await _invoice.save();
             return {
                 message: 'Booking created successfully',
                 code: 0,
@@ -131,10 +146,11 @@ const createBookingService = async (data) => {
             };
         } else {
             let invoice = await db.Invoice.create({
-                totalAmount: room.price,
+                totalAmount: totalPrice,
                 status: 0,
                 note: '',
                 userId: data.userId,
+                payments: totalPrice,
             });
             let bookingData = {
                 checkIn: data.startDate,
@@ -188,8 +204,66 @@ const getBookingsByInvoiceService = async (invoiceId) => {
     }
 };
 
+const blockRoomService = async (data) => {
+    try {
+        if (data.rooms) {
+            for (let room of data.rooms) {
+                const roomDB = await db.Room.findOne({
+                    where: {
+                        id: room.id,
+                    },
+                });
+                if (roomDB) {
+                    await roomDB.update({ status: 1 });
+                }
+            }
+        }
+        return {
+            message: 'Room blocked successfully',
+            code: 0,
+            data: [],
+        };
+    } catch (error) {
+        return {
+            message: error.message,
+            code: -1,
+            data: [],
+        };
+    }
+};
+
+const unblockRoomService = async (data) => {
+    try {
+        if (data.rooms) {
+            for (let room of data.rooms) {
+                const roomDB = await db.Room.findOne({
+                    where: {
+                        id: room.id,
+                    },
+                });
+                if (roomDB) {
+                    await roomDB.update({ status: 0 });
+                }
+            }
+        }
+        return {
+            message: 'Room unblocked successfully',
+            code: 0,
+            data: [],
+        };
+    } catch (error) {
+        return {
+            message: error.message,
+            code: -1,
+            data: [],
+        };
+    }
+};
+
 module.exports = {
     getRoomByIdService,
     createBookingService,
     getBookingsByInvoiceService,
+    blockRoomService,
+    unblockRoomService,
 };

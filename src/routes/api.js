@@ -70,6 +70,8 @@ const initApiRoutes = (app) => {
     router.get('/room/:id', bookingController.getRoomById);
     router.post('/booking/create', bookingController.createBooking);
     router.get('/booking/by-invoice', bookingController.getBookingsByInvoice);
+    router.post('/booking/block-rooms', bookingController.blockRoom);
+    router.post('/booking/unlock-rooms', bookingController.unblockRoom);
 
     //invoice
     router.get('/invoice/by-user', invoiceController.getInvoicesByUser);
@@ -78,9 +80,15 @@ const initApiRoutes = (app) => {
         invoiceController.getQuantityInvoicesByUser
     );
     router.post('/invoice/pay-deposit', invoiceController.payDeposit);
+    router.get('/invoices', invoiceController.getInvoices);
+    router.put('/invoice/complete-payment', invoiceController.payInvoice);
+    router.post(
+        '/invoice/confirm-pay-deposit',
+        invoiceController.confirmPayDeposit
+    );
 
-    //note: status of room: 0: available, 1: booked, -1: cleaning
-    //note: status of invoice: 0: need to pay deposit, 1: unpaid, 2: paid, -1: canceled
+    //note: status of room: 0: available, 1: booking, 2: booked
+    //note: status of invoice: 0: need to pay deposit, 1: Wait for payment confirmation, 2: unpaid, 3: paid, -1: canceled
     return app.use('/api/v1', router);
 };
 
