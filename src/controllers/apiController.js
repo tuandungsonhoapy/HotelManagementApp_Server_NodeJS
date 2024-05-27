@@ -1,3 +1,4 @@
+import { sign } from 'jsonwebtoken';
 import UserService from '../services/UserService';
 
 const handleRegister = async (req, res) => {
@@ -81,9 +82,10 @@ const handleLogin = async (req, res) => {
         let response = await UserService.handleUserLogin(req.body);
 
         if (response && response.data && response.data.access_token) {
-            res.cookie('jwt', response.data.access_token, {
-                httpOnly: false,
-                maxAge: 12 * 60 * 60 * 1000,
+            res.cookie('jwt_web', response.data.access_token, {
+                httpOnly: true,
+                maxAge: 12 * 60 * 60 * 1000, // Cookie sẽ hết hạn sau 12 giờ
+                signed: true,
             });
         }
 

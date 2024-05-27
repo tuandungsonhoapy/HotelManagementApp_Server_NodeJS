@@ -19,7 +19,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 //Config cookie parser
-app.use(cookieParser());
+app.use(cookieParser(process.env.JWT_SECRET));
 
 //CORS
 configCors(app);

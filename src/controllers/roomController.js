@@ -122,6 +122,42 @@ const getRoomsByCategory = async (req, res) => {
     }
 };
 
+const getRoomsByOption = async (req, res) => {
+    try {
+        let response = await roomService.getRoomsByOptionService(
+            req.query.checkIn,
+            req.query.checkOut,
+            req.query.categoryId
+        );
+        console.log(
+            '>>>>>>>>>>>>>>>>..',
+            req.query.checkIn,
+            req.query.checkOut,
+            req.query.categoryId
+        );
+        return res.status(200).json({
+            message: response.message,
+            code: response.code,
+            data: response.data,
+            status: 200,
+        });
+        // return res.status(200).json({
+        //     message: '',
+        //     code: '',
+        //     data: '',
+        //     status: 200,
+        // });
+    } catch (error) {
+        console.log('>>>Error: ', error);
+        return res.status(500).json({
+            message: error.message,
+            code: error.code,
+            data: error.data,
+            status: 500,
+        });
+    }
+};
+
 export default {
     getRooms,
     createRoom,
@@ -129,4 +165,5 @@ export default {
     updateRoom,
     searchRoom,
     getRoomsByCategory,
+    getRoomsByOption,
 };

@@ -8,6 +8,7 @@ import categoryController from '../controllers/categoryController';
 import roomController from '../controllers/roomController';
 import bookingController from '../controllers/bookingController';
 import invoiceController from '../controllers/invoiceController';
+import serviceController from '../controllers/serviceController';
 
 const router = express.Router();
 
@@ -65,6 +66,7 @@ const initApiRoutes = (app) => {
     router.put('/room/update', roomController.updateRoom);
     router.get('/room/search', roomController.searchRoom);
     router.get('/room/empty-by-category', roomController.getRoomsByCategory);
+    router.get('/room/empty-by-option', roomController.getRoomsByOption);
 
     //booking
     router.get('/room/:id', bookingController.getRoomById);
@@ -72,6 +74,7 @@ const initApiRoutes = (app) => {
     router.get('/booking/by-invoice', bookingController.getBookingsByInvoice);
     router.post('/booking/block-rooms', bookingController.blockRoom);
     router.post('/booking/unlock-rooms', bookingController.unblockRoom);
+    router.delete('/booking/delete', bookingController.deleteBooking);
 
     //invoice
     router.get('/invoice/by-user', invoiceController.getInvoicesByUser);
@@ -86,8 +89,19 @@ const initApiRoutes = (app) => {
         '/invoice/confirm-pay-deposit',
         invoiceController.confirmPayDeposit
     );
+    router.put(
+        '/invoice/reject-pay-deposit',
+        invoiceController.rejectPayDeposit
+    );
+    router.get('/invoice/check-invoice', invoiceController.checkInvoice);
 
-    //note: status of room: 0: available, 1: booking, 2: booked
+    //service
+    router.get('/services', serviceController.getServices);
+    router.post('/service/create', serviceController.createService);
+    router.delete('/service/delete', serviceController.deleteService);
+    router.put('/service/update', serviceController.updateService);
+
+    //note: status of room: 0: available, 1: blocked
     //note: status of invoice: 0: need to pay deposit, 1: Wait for payment confirmation, 2: unpaid, 3: paid, -1: canceled
     return app.use('/api/v1', router);
 };

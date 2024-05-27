@@ -9,10 +9,6 @@ const configCors = (app) => {
             res.setHeader('Access-Control-Allow-Origin', origin);
         }
         // res.setHeader('Access-Control-Allow-Origin', process.env.REACT_APP);
-        // res.setHeader(
-        //     'Access-Control-Allow-Origin',
-        //     'https://1401-14-161-6-190.ngrok-free.app'
-        // );
         // Request methods you wish to allow
         res.setHeader(
             'Access-Control-Allow-Methods',

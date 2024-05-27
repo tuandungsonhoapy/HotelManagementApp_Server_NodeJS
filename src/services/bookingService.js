@@ -35,11 +35,13 @@ const isExistBooking = async (roomId, startDate, endDate) => {
             where: {
                 id: roomId,
             },
-            include: {
-                model: db.Invoice,
-                attributes: ['id', 'checkIn', 'checkOut'],
-                through: { attributes: [] },
-            },
+            include: [
+                {
+                    model: db.Invoice,
+                    through: { model: db.Booking },
+                    required: false,
+                },
+            ],
         });
         if (!data) {
             return {
@@ -48,12 +50,27 @@ const isExistBooking = async (roomId, startDate, endDate) => {
                 data: [],
             };
         }
-        let bookings = data.Invoices;
-        let isExist = bookings.some((booking) => {
+        let invoices = data.Invoices;
+        let isExist = invoices.some((invoice) => {
+            if (invoice.status === 0) return false;
+            let booking = invoice.Booking;
+            // Chuyển đổi startDate và endDate thành đối tượng Date
+            let start = new Date(startDate);
+            let end = new Date(endDate);
+
+            // Chuyển đổi booking.checkIn và booking.checkOut thành đối tượng Date
+            let checkIn = new Date(booking.checkIn);
+            let checkOut = new Date(booking.checkOut);
+
+            let currentDate = new Date();
+            if (checkOut <= currentDate) {
+                return false;
+            }
+
             return (
-                (startDate >= booking.checkIn &&
-                    startDate <= booking.checkOut) ||
-                (endDate >= booking.checkIn && endDate <= booking.checkOut)
+                (start >= checkIn && start <= checkOut) ||
+                (end >= checkIn && end <= checkOut) ||
+                (start <= checkIn && end >= checkOut)
             );
         });
         return isExist;
@@ -92,7 +109,12 @@ const createBookingService = async (data) => {
                 data: [],
             };
         }
-        if (room.status !== 0) {
+        let isExist = await isExistBooking(
+            data.roomId,
+            data.startDate,
+            data.endDate
+        );
+        if (isExist) {
             return {
                 message: 'Room is not available',
                 code: 1,
@@ -186,7 +208,7 @@ const getBookingsByInvoiceService = async (invoiceId) => {
             include: {
                 model: db.Room,
                 attributes: ['id', 'roomNumber', 'price'],
-                through: { attributes: ['checkIn', 'checkOut', 'price'] },
+                through: { attributes: ['id', 'checkIn', 'checkOut', 'price'] },
             },
         });
         return {
@@ -259,6 +281,27 @@ const unblockRoomService = async (data) => {
         };
     }
 };
+const deleteBookingService = async (id) => {
+    try {
+        let data = await db.Booking.destroy({
+            where: {
+                id: id,
+            },
+        });
+        return {
+            message: 'Booking deleted successfully',
+            code: 0,
+            data: data,
+        };
+    } catch (error) {
+        console.log('>>>Error: ', error);
+        return {
+            message: error.message,
+            code: -1,
+            data: null,
+        };
+    }
+};
 
 module.exports = {
     getRoomByIdService,
@@ -266,4 +309,5 @@ module.exports = {
     getBookingsByInvoiceService,
     blockRoomService,
     unblockRoomService,
+    deleteBookingService,
 };
