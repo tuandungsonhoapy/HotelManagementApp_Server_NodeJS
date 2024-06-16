@@ -283,16 +283,50 @@ const unblockRoomService = async (data) => {
 };
 const deleteBookingService = async (id) => {
     try {
-        let data = await db.Booking.destroy({
+        let data = await db.Booking.findOne({
             where: {
                 id: id,
             },
         });
-        return {
-            message: 'Booking deleted successfully',
-            code: 0,
-            data: data,
-        };
+        let room = await db.Room.findOne({
+            where: {
+                id: data.roomId,
+            },
+        });
+        let invoice = await db.Invoice.findOne({
+            where: {
+                id: data.invoiceId,
+            },
+        });
+        let _startDate = new Date(data.checkIn);
+        _startDate.setHours(0, 0, 0, 0);
+
+        let _endDate = new Date(data.checkOut);
+        _endDate.setHours(0, 0, 0, 0);
+
+        // Tính số ngày giữa hai ngày
+        let diffInTime = _endDate.getTime() - _startDate.getTime();
+        let diffInDays = Math.ceil(diffInTime / (1000 * 3600 * 24));
+
+        invoice.totalAmount -= room.price * diffInDays;
+        invoice.payments -= room.price * diffInDays;
+        if (invoice.totalAmount === 0) {
+            await invoice.destroy();
+            await data.destroy();
+            return {
+                message: 'Booking deleted successfully',
+                code: 0,
+                data: 0,
+            };
+        } else {
+            await invoice.save();
+            await data.destroy();
+            return {
+                message: 'Booking deleted successfully',
+                code: 0,
+                data: 1,
+            };
+        }
     } catch (error) {
         console.log('>>>Error: ', error);
         return {

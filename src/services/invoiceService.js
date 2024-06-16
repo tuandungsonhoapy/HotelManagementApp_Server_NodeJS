@@ -145,13 +145,13 @@ const payDepositService = async (data) => {
                     booking.checkIn,
                     booking.checkOut
                 );
-                if (isExist || room.status === 1) {
-                    return {
-                        message: `Room number ${room.roomNumber} has been booked`,
-                        code: 1,
-                        data: room,
-                    };
-                }
+                // if (isExist || room.status === 1) {
+                //     return {
+                //         message: `Room number ${room.roomNumber} has been booked`,
+                //         code: 1,
+                //         data: room,
+                //     };
+                // }
             }
         }
         let newPrice = invoice.totalAmount - data.price;
@@ -330,15 +330,35 @@ const checkInvoiceService = async (invoiceId) => {
             ],
         });
         if (invoice) {
-            const roomListHasBeenBooked = invoice.Rooms.filter(
+            const roomHasBeenBooked = [];
+            for (let room of invoice.Rooms) {
+                const isExist = await isExistBooking(
+                    room.id,
+                    room.Booking.checkIn,
+                    room.Booking.checkOut
+                );
+                if (isExist) {
+                    roomHasBeenBooked.push(room);
+                }
+            }
+            if (roomHasBeenBooked.length > 0) {
+                return {
+                    message: `Phòng số ${roomHasBeenBooked.map(
+                        (room) => room.roomNumber
+                    )} đã được đặt!`,
+                    code: 1,
+                    data: roomHasBeenBooked,
+                };
+            }
+            const roomIsBeingPaid = invoice.Rooms.filter(
                 (room) => room.status === 1
             );
-            if (roomListHasBeenBooked.length > 0) {
+            if (roomIsBeingPaid.length > 0) {
                 return {
                     message: `Danh sách các phòng đang trong quá trình thanh toán:
-                    ${roomListHasBeenBooked.map((room) => room.roomNumber)}`,
+                    ${roomIsBeingPaid.map((room) => room.roomNumber)}`,
                     code: 1,
-                    data: roomListHasBeenBooked,
+                    data: roomIsBeingPaid,
                 };
             } else {
                 for (let room of invoice.Rooms) {
