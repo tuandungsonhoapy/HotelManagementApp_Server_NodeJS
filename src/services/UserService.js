@@ -106,7 +106,6 @@ const handleUserLogin = async (data) => {
                 let payload = {
                     id: user.id,
                     username: user.username,
-                    groupWithRoles,
                 };
                 let token = createJWT(payload);
                 return {
@@ -466,6 +465,40 @@ const searchUserWithPagination = async (page, limit, search) => {
     }
 };
 
+const getUserInfomation = async (userId, username) => {
+    try {
+        const user = await db.User.findOne({
+            attributes: ['id', 'username', 'groupId'],
+            where: {
+                [Op.and]: [{ id: userId }, { username: username }],
+            },
+        });
+        if (user) {
+            const groupWithRoles = await getGroupWithRoles(user.groupId);
+            return {
+                message: 'get user success!',
+                code: 0,
+                data: {
+                    id: user.id,
+                    username: user.username,
+                    groupWithRoles,
+                },
+            };
+        }
+        return {
+            message: 'get user infomation fail!',
+            code: 1,
+            data: {},
+        };
+    } catch (error) {
+        return {
+            message: 'Something wrongs with server!',
+            code: -1,
+            data: {},
+        };
+    }
+};
+
 module.exports = {
     registerNewUser,
     handleUserLogin,
@@ -475,4 +508,17 @@ module.exports = {
     getUsersWithPagination,
     createUserService,
     searchUserWithPagination,
+    getUserInfomation,
+};
+
+export {
+    registerNewUser,
+    handleUserLogin,
+    getUsersService,
+    updateUserService,
+    deleteUserService,
+    getUsersWithPagination,
+    createUserService,
+    searchUserWithPagination,
+    getUserInfomation,
 };

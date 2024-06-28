@@ -1,4 +1,4 @@
-import userService from '../services/UserService';
+import userService, { getUserInfomation } from '../services/UserService';
 
 const getUsers = async (req, res) => {
     try {
@@ -106,9 +106,15 @@ const createUser = async (req, res) => {
 };
 
 const getUserAccount = async (req, res) => {
+    const { id, username } = req.user;
+    const response = await getUserInfomation(id, username);
+    const groupWithRoles = response.data.groupWithRoles;
     const data = {
         access_token: req.token,
-        user: req.user,
+        user: {
+            ...req.user,
+            groupWithRoles,
+        },
     };
     console.log(data);
     return res.status(200).json({

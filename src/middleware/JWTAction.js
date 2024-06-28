@@ -1,5 +1,6 @@
 require('dotenv').config();
 import jwt from 'jsonwebtoken';
+import UserService, { getUserInfomation } from '../services/UserService';
 
 const nonSecurePaths = [
     '/register',
@@ -82,7 +83,7 @@ const checkUserJWT = (req, res, next) => {
     }
 };
 
-const checkUserPermission = (req, res, next) => {
+const checkUserPermission = async (req, res, next) => {
     if (nonSecurePaths.includes(req.path)) return next();
     for (let path of nonPermissionPaths) {
         if (req.path.includes(path)) {
@@ -96,29 +97,43 @@ const checkUserPermission = (req, res, next) => {
     }
 
     if (req.user) {
-        let { username, groupWithRoles } = req.user;
-        let roles = groupWithRoles.Roles;
-        let currentUrl = req.path;
-        if (!roles || roles.length === 0) {
-            return res.status('403').json({
-                message: `You don't have permission to access this url!`,
-                code: -3,
-                data: '',
-                status: '403',
-            });
-        }
+        let { id, username } = req.user;
+        try {
+            const responseUser = await getUserInfomation(id, username);
+            console.log('>>>>>>>>>>>>>>>>>>.. responseUsser: ', responseUser);
+            const groupWithRoles = responseUser.data.groupWithRoles;
+            let roles = groupWithRoles.Roles;
 
-        let canAccess = roles.some(
-            (item) => item.url === currentUrl || currentUrl.includes(item.url)
-        );
-        if (canAccess === true) {
-            next();
-        } else {
-            return res.status('403').json({
-                message: `You don't have permission to access this url!`,
-                code: -3,
-                data: '',
-                status: '403',
+            let currentUrl = req.path;
+            if (!roles || roles.length === 0) {
+                return res.status('403').json({
+                    message: `You don't have permission to access this url!`,
+                    code: -3,
+                    data: '',
+                    status: '403',
+                });
+            }
+
+            let canAccess = roles.some(
+                (item) =>
+                    item.url === currentUrl || currentUrl.includes(item.url)
+            );
+            if (canAccess === true) {
+                next();
+            } else {
+                return res.status('403').json({
+                    message: `You don't have permission to access this url!`,
+                    code: -3,
+                    data: '',
+                    status: '403',
+                });
+            }
+        } catch (error) {
+            return res.status(500).json({
+                message: error.message,
+                code: -1,
+                data: {},
+                status: 500,
             });
         }
     } else {
